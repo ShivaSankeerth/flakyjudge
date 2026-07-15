@@ -73,6 +73,14 @@ standardized drift dz >= 0.23 at 80% power (~0.16 points on the 1-5 scale).
    every raw response is stored as provenance; each judge's calls run within
    a tight time window.
 
+**Gate calibration amendment (pre-E3-scoring, post-generation QA):** the
+polarity gate's negator lexicon falsely flagged meaning-preserving phrasings
+("free from", "steers clear") and was expanded; regeneration attempts raised
+from 3 to 5. The cosine >= 0.80 and length gates are unchanged. No judge had
+scored any paraphrase when this change was made; first-pass gate failure
+rates (223 cosine, 73 polarity of 1,200) are preserved in
+data/paraphrase_gate_report.json history.
+
 ## Primary metrics
 
 - Decision flip rate at the 2.5 pass/fail threshold (LMUnit's), reported as
