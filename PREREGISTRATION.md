@@ -35,9 +35,17 @@ rationale-mode ablations, non-English robustness, multi-turn/RAG evaluation.
 
 ## Designs and sample sizes
 
+**Prompt modes (amendment, pre-data-collection):** E1 runs in two prompt
+modes: (a) LMUnit-parity — rubric and reference answer appended to the unit
+test, matching the paper's FLASK/BiGGen setup, used for the sanity gate; and
+(b) bare-assertion — unit test only, the deployed-practice setting. E2-E4 use
+bare-assertion mode: paraphrase sensitivity is measured on the criterion
+practitioners actually write, unanchored by a rubric. Comparing modes in E1
+additionally quantifies what the rubric buys.
+
 | Exp | Design | n |
 |---|---|---|
-| E1 anchor | seeded stratified sample, both scoring modes from one call | 500 FLASK + 500 BiGGen x 6 judges |
+| E1 anchor | seeded stratified sample, both scoring modes from one call, 2 prompt modes | 500 FLASK + 500 BiGGen x 6 judges x 2 modes |
 | E2 noise floor | identical-input resamples + field-reorder variant | 100 items x 5 repeats x 6 judges; 100 x 2 orderings x 6 |
 | E3 paraphrase | typed paraphrases (lexical/syntactic/register/form) + positive controls | 150 FLASK items (50 low / 50 mid / 50 high human score) x 6 paraphrases x 6 judges |
 | E4 verbosity | NLI-verified matched-content pairs | 150 items x 2 variants x 6 judges |
