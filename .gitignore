@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+dist/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.DS_Store
+# local scratch; the canonical cache lives in data/cache and IS committed
+scratch/
+.env

@@ -1,0 +1,52 @@
+# Frozen judge lineup. Model IDs are pinned snapshots where the provider
+# offers them; verify against the live model list before first run and do
+# not change mid-study (record per-call `model` from responses as provenance).
+judges:
+  claude-sonnet:
+    provider: anthropic
+    model: claude-sonnet-4-6
+    base_url: https://api.anthropic.com/v1
+    api_key_env: ANTHROPIC_API_KEY
+    price_in_per_mtok: 3.00
+    price_out_per_mtok: 15.00
+    supports_logprobs: false
+  claude-haiku:
+    provider: anthropic
+    model: claude-haiku-4-5
+    base_url: https://api.anthropic.com/v1
+    api_key_env: ANTHROPIC_API_KEY
+    price_in_per_mtok: 1.00
+    price_out_per_mtok: 5.00
+    supports_logprobs: false
+  gpt-4o:
+    provider: openai-compat
+    model: gpt-4o-2024-11-20
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    price_in_per_mtok: 2.50
+    price_out_per_mtok: 10.00
+    supports_logprobs: true
+  gpt-4o-mini:
+    provider: openai-compat
+    model: gpt-4o-mini-2024-07-18
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    price_in_per_mtok: 0.15
+    price_out_per_mtok: 0.60
+    supports_logprobs: true
+  gemini-flash:
+    provider: openai-compat
+    model: gemini-2.0-flash
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai
+    api_key_env: GEMINI_API_KEY
+    price_in_per_mtok: 0.10
+    price_out_per_mtok: 0.40
+    supports_logprobs: false
+  qwen-7b:
+    provider: openai-compat
+    model: qwen/qwen-2.5-7b-instruct
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    price_in_per_mtok: 0.05
+    price_out_per_mtok: 0.10
+    supports_logprobs: true
