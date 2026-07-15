@@ -81,6 +81,15 @@ scored any paraphrase when this change was made; first-pass gate failure
 rates (223 cosine, 73 polarity of 1,200) are preserved in
 data/paraphrase_gate_report.json history.
 
+**Two-tier gate amendment (pre-E3-scoring):** the strict cosine gate
+systematically rejects lexical and casual-register paraphrases (synonym
+swaps move embeddings even when meaning is preserved), a selection bias
+TOWARD finding stability. Candidates with cosine in [0.70, 0.80) passing
+polarity+length are admitted if a bidirectional semantic-equivalence check
+(gpt-4o-mini, cached) answers equivalent, labeled gate_tier='adjudicated'
+(96 of 1,200 variants). All E3 analyses are run twice — strict-only and
+strict+adjudicated — as a sensitivity analysis.
+
 ## Primary metrics
 
 - Decision flip rate at the 2.5 pass/fail threshold (LMUnit's), reported as
