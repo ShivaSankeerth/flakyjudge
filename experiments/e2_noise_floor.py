@@ -65,7 +65,7 @@ async def main() -> None:
             for (_, _, repeat, prompt, temp) in conditions
         ]
         scored = await run_calls(cache, calls, concurrency=args.concurrency)
-        for (item, condition, repeat, _, temp), result in zip(conditions, scored):
+        for (item, condition, repeat, _, temp), result in zip(conditions, scored, strict=True):
             rows.append(
                 {
                     "experiment": "e2",

@@ -80,7 +80,7 @@ def fig1_hero(e3: pd.DataFrame, judge: str = "gpt-4o") -> None:
 
     fig, ax = plt.subplots(figsize=(9.6, 4.2), dpi=200)
     x = np.arange(len(order))
-    for xi, low, high, flip in zip(x, lo, hi, flips):
+    for xi, low, high, flip in zip(x, lo, hi, flips, strict=True):
         color = ACCENT if flip else DEEMPH
         if high - low < 0.05:
             # Perfectly stable item: a zero-length line is invisible.
@@ -147,7 +147,7 @@ def fig2_flip_rates(e3: pd.DataFrame, e2: pd.DataFrame) -> None:
         pos = y + (i - 1) * band
         ax.barh(pos, values[cond], height=band - 0.04, color=ORDINAL[i],
                 label=cond, zorder=3)
-        for yi, v in zip(pos, values[cond]):
+        for yi, v in zip(pos, values[cond], strict=True):
             ax.text(v + 0.004, yi, f"{v * 100:.1f}%", va="center",
                     fontsize=9, color=INK_SECONDARY)
     ax.set_yticks(y)
@@ -211,7 +211,7 @@ def fig3_mechanism(e3: pd.DataFrame) -> None:
             rates.append(float((passes.any(axis=1) & ~passes.all(axis=1)).mean()))
         pos = x + (i - 0.5) * 0.34
         bars = ax2.bar(pos, rates, width=0.30, color=colors[judge], zorder=3)
-        for b, v in zip(bars, rates):
+        for b, v in zip(bars, rates, strict=True):
             ax2.text(b.get_x() + b.get_width() / 2, v + 0.008, f"{v * 100:.0f}%",
                      ha="center", fontsize=9, color=INK_SECONDARY)
     ax2.set_xticks(x)

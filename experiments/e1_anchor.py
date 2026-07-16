@@ -66,7 +66,7 @@ async def main() -> None:
                 )
                 calls.append((spec, make_key(spec, prompt), prompt))
             scored = await run_calls(cache, calls, concurrency=args.concurrency)
-            for item, result in zip(items, scored):
+            for item, result in zip(items, scored, strict=True):
                 rows.append(
                     {
                         "experiment": "e1",

@@ -83,7 +83,7 @@ def build_perturb_manifest(e1_items: list[dict]) -> list[dict]:
     for item in flask_items:
         by_band[_label_band(item["label"])].append(item)
     chosen = []
-    for band, members in sorted(by_band.items()):
+    for _band, members in sorted(by_band.items()):
         take = min(PERTURB_PER_BAND, len(members))
         idx = rng.choice(len(members), size=take, replace=False)
         chosen.extend(members[i] for i in idx)

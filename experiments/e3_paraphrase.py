@@ -54,7 +54,7 @@ async def main() -> None:
             prompt = build_prompt(item["query"], item["response"], variant["unit_test"])
             calls.append((spec, make_key(spec, prompt), prompt))
         scored = await run_calls(cache, calls, concurrency=args.concurrency)
-        for variant, result in zip(variants, scored):
+        for variant, result in zip(variants, scored, strict=True):
             item = items[variant["item_id"]]
             rows.append(
                 {
