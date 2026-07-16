@@ -90,6 +90,11 @@ polarity+length are admitted if a bidirectional semantic-equivalence check
 (96 of 1,200 variants). All E3 analyses are run twice — strict-only and
 strict+adjudicated — as a sensitivity analysis.
 
+**Spot-check completion note (2026-07-16):** the preregistered 10% manual
+review (data/spot_check_sample.jsonl, 112 variants) was completed by the
+author; no meaning-changing paraphrases were flagged among the admitted
+variants.
+
 ## Primary metrics
 
 - Decision flip rate at the 2.5 pass/fail threshold (LMUnit's), reported as
