@@ -10,10 +10,13 @@ its meaning, does the verdict change?
 
 ![Rewording a unit test flips 16 of 78 verdicts (gpt-4o)](figures/fig1_hero_flips.png)
 
-> 🚧 **Study in progress.** Experimental design is frozen in
-> [PREREGISTRATION.md](PREREGISTRATION.md). Results below cover the two
-> OpenAI judges; four more judges, the verbosity experiment, and the full
-> tech report are landing next.
+**📄 Tech report: [report/report.md](report/report.md)** — methods, all
+results, practical guidance, limitations.
+
+> 🚧 Experimental design is frozen in
+> [PREREGISTRATION.md](PREREGISTRATION.md). Results cover the two OpenAI
+> judges (all four experiments complete); Claude, Gemini, and Qwen judges
+> are landing next.
 
 ## Early findings
 
