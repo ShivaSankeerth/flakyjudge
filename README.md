@@ -31,6 +31,13 @@ its meaning, does the verdict change?
   paraphrases and flip 2–5× more than any single paraphrase type.
 
   ![Which rewordings move the score](figures/fig3_mechanism.png)
+- **The classic verbosity bias largely disappears under criterion-anchored
+  judging:** padding responses 1.8× (content-matched, claim-audited) moves
+  gpt-4o's scores by +0.01 (p=0.96); if anything, gpt-4o *rewards concision*
+  (+0.23 for 0.54× condensed variants, p=0.03). Verbosity elasticity is
+  slightly negative for both judges. This supports the decomposition
+  hypothesis: unit-test framing may shield judges from the length halo
+  documented in holistic and pairwise judging.
 - **The logprob-weighted scoring trick buys little off-the-shelf:**
   +0.01–0.02 Spearman vs direct digit scoring, CIs crossing zero.
 - **Rubrics make judges harsher, not more valid:** appending the FLASK
