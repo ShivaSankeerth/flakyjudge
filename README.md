@@ -59,7 +59,7 @@ content-addressed cache, so all results and figures regenerate with **zero
 API keys and zero dollars**:
 
 ```bash
-git clone https://github.com/shivasankeerth/flakyjudge && cd flakyjudge
+git clone https://github.com/ShivaSankeerth/flakyjudge && cd flakyjudge
 uv sync
 make figures
 ```
