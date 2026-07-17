@@ -123,10 +123,18 @@ def fig1_hero(e3: pd.DataFrame, judge: str = "gpt-4o") -> None:
 
 
 def flip_vs_original(wide: pd.DataFrame, cols: list[str]) -> float:
-    """Mean per-variant rate of verdict disagreement with the original."""
+    """Mean per-variant rate of verdict disagreement with the original.
+
+    Missing variant scores (parse failures) are excluded, not counted as
+    flips — mirrors supplementary.per_variant_flip.
+    """
     orig_pass = wide["original"] > PASS_THRESHOLD
-    rates = [((wide[c] > PASS_THRESHOLD) != orig_pass).mean()
-             for c in cols if c in wide]
+    rates = []
+    for c in cols:
+        if c not in wide:
+            continue
+        mask = wide[c].notna() & wide["original"].notna()
+        rates.append(((wide[c] > PASS_THRESHOLD) != orig_pass)[mask].mean())
     return float(np.mean(rates))
 
 

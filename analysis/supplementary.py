@@ -262,14 +262,20 @@ def main() -> None:
                           "ci": [float(ci[0]), float(ci[1])],
                           "dz": float(dz), "p_wilcoxon": float(p),
                           "p_tost_equiv": float(p_tost)})
-    # Holm correction over the 10 wilcoxon tests
-    ps = sorted(range(len(tests)), key=lambda i: tests[i]["p_wilcoxon"])
-    m = len(tests)
-    running_max = 0.0
-    for rank, i in enumerate(ps):
-        adj = min(1.0, (m - rank) * tests[i]["p_wilcoxon"])
-        running_max = max(running_max, adj)
-        tests[i]["p_holm"] = running_max
+    # Holm step-down applied SYMMETRICALLY: to the 10 difference tests and
+    # to the 10 equivalence tests (an uncorrected TOST family next to a
+    # corrected difference family would bias toward the null story).
+    def holm(key: str, out_key: str) -> None:
+        order = sorted(range(len(tests)), key=lambda i: tests[i][key])
+        m = len(tests)
+        running_max = 0.0
+        for rank, i in enumerate(order):
+            adj = min(1.0, (m - rank) * tests[i][key])
+            running_max = max(running_max, adj)
+            tests[i][out_key] = running_max
+
+    holm("p_wilcoxon", "p_holm")
+    holm("p_tost_equiv", "p_tost_holm")
     out["I_verbosity"] = tests
 
     (ROOT / "results" / "supplementary.json").write_text(

@@ -23,11 +23,12 @@ results, practical guidance, limitations.
 
 - **Rewording a unit test flips its pass/fail verdict on 14–25% of items**
   (n=68–78 per judge; Wilson 95% CIs ±8–11 points, so the judge-vs-judge
-  ordering is not established) — **4–19× each judge's identical-input
-  resampling flip rate** under matched-k definitions.
+  ordering is not established) — **4–18× each judge's identical-input
+  resampling flip rate** under matched-k definitions (T=0; at T=1,
+  sampling noise alone rivals the wording effect).
 - **Criterion wording acts as a hidden decision threshold:** flips
-  concentrate ~3–7× on items whose scores sit near the pass/fail cut
-  (29–40%) vs clear verdicts (5–13%).
+  concentrate ~2–7× on items whose scores sit near the pass/fail cut
+  (29–40%) vs clear verdicts (4–13%).
 
   ![Flip rates vs noise floor and controls](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig2_flip_rates.png)
 - **"Stability" without validity is insensitivity — the controls catch it:**
@@ -38,10 +39,12 @@ results, practical guidance, limitations.
   ![Which rewordings move the score](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig3_mechanism.png)
 - **No detectable verbosity bias in any family:** content-matched 1.8×
   padding produces no drift that survives multiple-comparison correction;
-  formal equivalence within ±0.25 points holds in 7 of 10 judge×condition
-  cells (TOST). The length halo documented for holistic/pairwise judging
-  does not appear in this criterion-anchored setting (no within-study
-  holistic arm, so no causal claim).
+  with the same correction applied to the equivalence tests, formal
+  equivalence within ±0.25 points holds in 3 of 10 judge×condition cells
+  (7 of 10 uncorrected) — the rest are inconclusive, not positive. The
+  length halo documented for holistic/pairwise judging does not appear in
+  this criterion-anchored setting (no within-study holistic arm, so no
+  causal claim).
 - **Field order rivals wording:** mechanically reordering the prompt
   fields flips 7–14% of verdicts — format sensitivity on par with
   paraphrase sensitivity.
@@ -56,8 +59,9 @@ results, practical guidance, limitations.
   judges "beat") and also among the most paraphrase-sensitive — and the
   least format-compliant (~10% of calls ignore the bare-digit
   instruction; OpenAI judges: 0%).
-- **Rubrics make judges harsher, not more valid:** appending the FLASK
-  rubric+reference shifts scores −0.25 to −0.29 with ~no correlation gain.
+- **Rubrics make every judge harsher (−0.11 to −0.36) but improve
+  validity only for claude-sonnet** (Δρ +0.06, CI excludes zero; ~zero
+  for the OpenAI judges).
 
 ## What this is
 

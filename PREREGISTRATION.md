@@ -93,7 +93,8 @@ strict+adjudicated — as a sensitivity analysis.
 **Spot-check note (2026-07-16, superseded 2026-07-17):** an initial
 author sign-off was recorded without per-row verdicts. It was superseded
 by a full per-row review of all 112 sampled variants by an LLM reviewer
-(Claude, independent of the five judges under test), with verdicts,
+(a Claude model that is not one of the five judges under test, but shares
+a vendor family with two of them), with verdicts,
 reviewer, and date recorded in data/spot_check_sample.jsonl: 79/83 true
 paraphrases equivalent (4 non-equivalent, 4.8%), all 29 controls correctly
 non-equivalent. The dominant failure mode (a spatial->physical scope shift
@@ -162,9 +163,17 @@ Differences between this plan and the realized study, in one place:
    paraphrase), spot-check drift-exclusion sensitivity.
 6. Preregistered analyses initially missing from the report, now included
    (report section 3.3): two-tier and salvage sensitivity, logprob-vs-direct
-   flip rates, k-sample averaging, variance decomposition, field-reorder
-   results.
-7. Hypothesis outcomes: H1 supported (excess flips, threshold
+   flip rates, k-sample averaging, variance decomposition with ICC(2,1) and
+   per-item SD, field-reorder results, and the T=1 noise floor (section
+   3.1).
+7. A second independent adversarial review (2026-07-17) found and led to
+   fixes for: a NaN-handling bug in the figure-2 computation (missing
+   scores were counted as flips), a rubric-validity claim contradicted by
+   the study's own bootstrap for claude-sonnet, stale variance numbers,
+   asymmetric multiplicity correction (Holm now applied to both the
+   difference and equivalence test families), and the unreported T=1
+   floor. Corrected in the same commit as this note.
+8. Hypothesis outcomes: H1 supported (excess flips, threshold
    concentration). H2 not supported (no length-ratio correlation; no
    family-specific direction). H3 partially supported: logprob weighting
    improves human-correlation for the small judge only, does not reduce
