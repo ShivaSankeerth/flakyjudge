@@ -9,3 +9,7 @@ dist/
 # local scratch; the canonical cache lives in data/cache and IS committed
 scratch/
 .env
+# live cache DB is packed via `make cache-pack`; only the .gz is committed
+data/cache/responses.db
+data/cache/*.db-wal
+data/cache/*.db-shm

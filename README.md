@@ -71,6 +71,7 @@ API keys and zero dollars**:
 ```bash
 git clone https://github.com/ShivaSankeerth/flakyjudge && cd flakyjudge
 uv sync
+make cache-unpack   # inflate the committed API-response cache (19MB gz)
 make figures
 ```
 
