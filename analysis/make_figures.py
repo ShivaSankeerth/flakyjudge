@@ -28,6 +28,15 @@ BASELINE = "#c3c2b7"
 ACCENT = "#2a78d6"       # categorical slot 1
 AQUA = "#1baf7a"         # categorical slot 2
 DEEMPH = "#c3c2b7"
+# Fixed judge -> color mapping (color follows the entity, never rank/order).
+JUDGE_COLORS = {
+    "gpt-4o": "#2a78d6",        # slot 1 blue
+    "gpt-4o-mini": "#1baf7a",   # slot 2 aqua
+    "claude-sonnet": "#eda100", # slot 3 yellow
+    "claude-haiku": "#4a3aa7",  # slot 5 violet
+    "llama-8b": "#e34948",      # slot 6 red
+}
+JUDGE_ORDER = list(JUDGE_COLORS)
 ORDINAL = ["#86b6ef", "#2a78d6", "#0d366b"]  # validated --ordinal
 
 PARA_TYPES = ["lexical", "syntactic", "register_formal", "register_casual",
@@ -124,7 +133,7 @@ def flip_vs_original(wide: pd.DataFrame, cols: list[str]) -> float:
 def fig2_flip_rates(e3: pd.DataFrame, e2: pd.DataFrame) -> None:
     """Comparable per-variant flip rates: resample floor vs paraphrase vs
     meaning-changed controls. Ordered conditions -> ordinal ramp."""
-    judges = sorted(e3.judge.unique())
+    judges = [j for j in JUDGE_ORDER if j in set(e3.judge.unique())]
     conditions = ["identical input, resampled", "meaning-preserving paraphrase",
                   "meaning-changed control"]
     values = {c: [] for c in conditions}
@@ -140,7 +149,7 @@ def fig2_flip_rates(e3: pd.DataFrame, e2: pd.DataFrame) -> None:
         values[conditions[1]].append(flip_vs_original(wide, PARA_TYPES))
         values[conditions[2]].append(flip_vs_original(wide, CONTROLS))
 
-    fig, ax = plt.subplots(figsize=(8.4, 3.2), dpi=200)
+    fig, ax = plt.subplots(figsize=(8.4, 6.2), dpi=200)
     band = 0.26
     y = np.arange(len(judges))
     for i, cond in enumerate(conditions):
@@ -171,20 +180,20 @@ def fig2_flip_rates(e3: pd.DataFrame, e2: pd.DataFrame) -> None:
 def fig3_mechanism(e3: pd.DataFrame) -> None:
     """Left: mean |score shift| per paraphrase type. Right: flip rate on
     near-threshold vs clear items. Two judges -> categorical slots 1-2."""
-    judges = sorted(e3.judge.unique())
-    colors = {judges[0]: ACCENT, judges[1]: AQUA} if len(judges) > 1 else \
-        {judges[0]: ACCENT}
+    judges = [j for j in JUDGE_ORDER if j in set(e3.judge.unique())]
+    colors = JUDGE_COLORS
     fig, (ax1, ax2) = plt.subplots(
-        1, 2, figsize=(10.4, 3.6), dpi=200, gridspec_kw={"width_ratios": [3, 2]})
+        1, 2, figsize=(11.6, 4.6), dpi=200, gridspec_kw={"width_ratios": [3, 2]})
 
-    band = 0.38
+    band = 0.8 / max(1, len(judges))
     y = np.arange(len(PARA_TYPES))
+    offset0 = (len(judges) - 1) / 2
     for i, judge in enumerate(judges):
         wide = e3[e3.judge == judge].pivot_table(
             index="item_id", columns="variant_type", values="score_direct")
         shifts = [(wide[t] - wide["original"]).abs().mean() for t in PARA_TYPES]
-        pos = y + (i - 0.5) * band
-        ax1.barh(pos, shifts, height=band - 0.06, color=colors[judge],
+        pos = y + (i - offset0) * band
+        ax1.barh(pos, shifts, height=band - 0.04, color=colors[judge],
                  label=judge, zorder=3)
     ax1.set_yticks(y)
     ax1.set_yticklabels([TYPE_LABELS[t] for t in PARA_TYPES], fontsize=9.5,
@@ -209,11 +218,12 @@ def fig3_mechanism(e3: pd.DataFrame) -> None:
             passes = np.column_stack([m > PASS_THRESHOLD,
                                       (wide.loc[mask, "original"] > PASS_THRESHOLD)])
             rates.append(float((passes.any(axis=1) & ~passes.all(axis=1)).mean()))
-        pos = x + (i - 0.5) * 0.34
-        bars = ax2.bar(pos, rates, width=0.30, color=colors[judge], zorder=3)
+        pos = x + (i - offset0) * (0.8 / len(judges))
+        bars = ax2.bar(pos, rates, width=0.8 / len(judges) - 0.03,
+                       color=colors[judge], zorder=3)
         for b, v in zip(bars, rates, strict=True):
             ax2.text(b.get_x() + b.get_width() / 2, v + 0.008, f"{v * 100:.0f}%",
-                     ha="center", fontsize=9, color=INK_SECONDARY)
+                     ha="center", fontsize=7.5, color=INK_SECONDARY)
     ax2.set_xticks(x)
     ax2.set_xticklabels(groups, fontsize=9, color=INK)
     ax2.yaxis.set_major_formatter(lambda v, _: f"{v * 100:.0f}%")

@@ -13,44 +13,49 @@ its meaning, does the verdict change?
 **📄 Tech report: [report/report.md](report/report.md)** — methods, all
 results, practical guidance, limitations.
 
-> 🚧 Experimental design is frozen in
-> [PREREGISTRATION.md](PREREGISTRATION.md). Results cover the two OpenAI
-> judges (all four experiments complete); Claude, Gemini, and Qwen judges
-> are landing next.
+> Experimental design frozen in [PREREGISTRATION.md](PREREGISTRATION.md).
+> Five judges across three families: gpt-4o, gpt-4o-mini, claude-sonnet-4-6,
+> claude-haiku-4-5, llama-3.1-8b. ~24,000 scored triples, $19 total spend.
 
-## Early findings
+## Findings
 
-- **Rewording a unit test flips its pass/fail verdict on 20.5% of items
-  (gpt-4o; 14.1% gpt-4o-mini)** — ~5× the identical-input resampling noise
-  floor (4.0% / 2.0%). Score ICC drops from 0.98 (resampling) to 0.91
-  (paraphrase).
+- **Rewording a unit test flips its pass/fail verdict on 14–25% of items**
+  (sonnet 25%, gpt-4o & haiku 20.5%, mini 14.1%) — 5–20× each judge's
+  identical-input resampling noise floor (0.8–4%).
 - **Criterion wording acts as a hidden decision threshold:** flips
-  concentrate ~3× on items whose scores sit near the pass/fail cut
-  (29–40%) vs clear verdicts (8–11%).
+  concentrate ~3–7× on items whose scores sit near the pass/fail cut
+  (29–40%) vs clear verdicts (5–13%).
 
   ![Flip rates vs noise floor and controls](figures/fig2_flip_rates.png)
-- **The instrument has resolution:** deliberately meaning-*changed*
-  controls (negated/swapped criteria) shift scores 3–4× more than true
-  paraphrases and flip 2–5× more than any single paraphrase type.
+- **"Stability" without validity is insensitivity — the controls catch it:**
+  llama-8b looks most stable under paraphrase (5% flips) but barely reacts
+  to deliberately meaning-*changed* criteria either (1–3% vs Claude's
+  47–54%) — it isn't robust, it isn't reading the criterion. Every real
+  judge shifts 3–4× more on controls than on true paraphrases.
 
   ![Which rewordings move the score](figures/fig3_mechanism.png)
-- **The classic verbosity bias largely disappears under criterion-anchored
-  judging:** padding responses 1.8× (content-matched, claim-audited) moves
-  gpt-4o's scores by +0.01 (p=0.96); if anything, gpt-4o *rewards concision*
-  (+0.23 for 0.54× condensed variants, p=0.03). Verbosity elasticity is
-  slightly negative for both judges. This supports the decomposition
-  hypothesis: unit-test framing may shield judges from the length halo
-  documented in holistic and pairwise judging.
-- **The logprob-weighted scoring trick buys little off-the-shelf:**
-  +0.01–0.02 Spearman vs direct digit scoring, CIs crossing zero.
+- **The classic verbosity bias disappears under criterion-anchored judging,
+  in every family:** content-matched 1.8× padding produces no significant
+  positive drift for any judge; gpt-4o *rewards concision* (+0.23,
+  p=0.03) and Claude trends mildly negative. The length halo documented
+  for holistic/pairwise judging does not survive decomposition.
+- **The logprob-weighted scoring trick is a small-model story:** it buys
+  +0.01–0.02 Spearman for GPT-4o-class judges (CIs cross zero) but
+  **+0.23** for llama-8b (CI [+0.17, +0.29]) — rescuing it from ρ≈0.13 to
+  ρ≈0.43. Expectation-scoring is what makes small judges usable.
+- **Validity and stability don't come together:** claude-sonnet is the
+  most human-aligned judge (ρ=0.69 vs the 0.56 human-agreement ceiling)
+  AND the most paraphrase-flippy (25%) — and the least format-compliant
+  (~10% of calls ignore the bare-digit instruction; OpenAI judges: 0%).
 - **Rubrics make judges harsher, not more valid:** appending the FLASK
   rubric+reference shifts scores −0.25 to −0.29 with ~no correlation gain.
 
 ## What this is
 
-An empirical robustness study across 6 judge models (Claude, GPT-4o, Gemini,
-Qwen families) on FLASK and BiGGen-Bench items, plus a small library
-implementing the measurement tools and mitigations:
+An empirical robustness study across 5 judge models in 3 families (GPT-4o,
+GPT-4o-mini, Claude Sonnet 4.6, Claude Haiku 4.5, Llama-3.1-8B) on FLASK
+and BiGGen-Bench items, plus a small library implementing the measurement
+tools and mitigations:
 
 - **E1** — judge-human correlation anchor; logprob-weighted vs. direct scoring
 - **E2** — identical-input noise floor (resampling + field-order stability)
