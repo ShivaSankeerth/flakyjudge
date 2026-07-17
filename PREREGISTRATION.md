@@ -102,6 +102,16 @@ Qwen model with valid logprobs, which this judge exists to provide. Also
 claude-haiku pinned to its dated snapshot ID. No experiment had run on
 either judge at amendment time.
 
+**Format-noncompliance rescue amendment (post-E2 observation, pre-final
+analysis):** claude-sonnet-4-6 emits free-text analysis instead of the
+instructed bare digit on ~10% of calls (truncating at max_tokens with no
+score; claude-haiku <=1.5%; OpenAI judges 0%). Parse-failure rates are
+reported as a first-class robustness metric as originally preregistered.
+Additionally, failed calls are reissued once with an assistant prefill
+("Score: ") forcing the digit as the first generated token — identical
+prompt and parameters, distinct cache tier ('prefill'). All Claude analyses
+are reported with and without salvaged scores.
+
 ## Primary metrics
 
 - Decision flip rate at the 2.5 pass/fail threshold (LMUnit's), reported as
