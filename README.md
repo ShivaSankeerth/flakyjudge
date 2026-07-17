@@ -67,6 +67,31 @@ Related work measures judge robustness at the *response* level
 level; this study targets the *criterion* level — the load-bearing assumption
 of the unit-test paradigm ([LMUnit](https://arxiv.org/abs/2412.13091)).
 
+## Use the mitigation: `pip install flakyjudge`
+
+Our headline finding is that single-shot verdicts silently depend on how
+you worded the assertion. `ensemble_score()` makes that visible: it scores
+your criterion plus n auto-generated meaning-preserving rewordings and
+reports the spread.
+
+```python
+from flakyjudge import ensemble_score
+
+r = ensemble_score(
+    query="What is your refund policy?",
+    response="You can return items within 30 days for a full refund.",
+    unit_test="Does the response state the refund time window?",
+    judge="gpt-4o-mini",        # or gpt-4o / claude-sonnet / claude-haiku,
+    n_paraphrases=4,            #    or any flakyjudge.JudgeSpec
+)
+r.score    # 5.00 (mean across wordings; logprob-weighted where available)
+r.stable   # True -> no wording flips the verdict
+r.margin   # 2.50 (distance from threshold; <1 means borderline: distrust it)
+```
+
+Use it for gating/CI evals where a silent wording flip matters; responses
+are cached in ~/.flakyjudge/ so repeat runs are free.
+
 ## Reproducibility
 
 Every raw API response (including logprobs) is committed in a

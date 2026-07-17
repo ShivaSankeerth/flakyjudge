@@ -7,6 +7,16 @@ requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Shiva Sankeerth", email = "shivasankeerth@gmail.com" }]
 keywords = ["llm", "evaluation", "llm-as-judge", "robustness", "unit-tests"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+]
+
 dependencies = [
     "httpx>=0.27",
     "numpy>=1.26",
@@ -20,6 +30,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "pytest-asyncio>=0.23", "ruff>=0.4"]
+
+[project.urls]
+Repository = "https://github.com/ShivaSankeerth/flakyjudge"
+"Tech Report" = "https://github.com/ShivaSankeerth/flakyjudge/blob/main/report/report.md"
 
 [build-system]
 requires = ["hatchling"]

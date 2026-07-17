@@ -13,3 +13,4 @@ scratch/
 data/cache/responses.db
 data/cache/*.db-wal
 data/cache/*.db-shm
+dist/
