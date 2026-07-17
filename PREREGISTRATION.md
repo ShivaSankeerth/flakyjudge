@@ -123,12 +123,14 @@ Salvage recovered 186/304 sonnet and 11/54 haiku failures; the remainder
 were still mid-analysis at 256 tokens and stay missing. All Claude analyses
 are reported with and without salvaged scores.
 
-**Judge exclusion note (2026-07-16):** gemini-flash is excluded. Google's
-free tier for new API accounts exposes only a rolling model alias
-(resolving to gemini-3.1-flash-lite) at 15 requests/minute with older flash
-models closed to new users; the ~4,800-call suite is infeasible within the
-study window without paid quota. Final lineup: 5 judges across 3 families
-(OpenAI, Anthropic, Meta/open-weights).
+**Judge exclusion note (2026-07-16, reversed 2026-07-17):** gemini-flash
+was excluded while the account's free tier allowed 15 requests/minute on
+the only accessible model alias. After a paid tier-1 upgrade the full
+suite became feasible and the judge was re-included, run with the same
+frozen prompt and manifests as all other judges. Final lineup: 6 judges
+across 4 families (OpenAI, Anthropic, Google, Meta/open-weights). Caveat
+inherited from the alias: no pinned snapshot exists for this account tier;
+the served model is recorded per call as provenance.
 
 ## Primary metrics
 

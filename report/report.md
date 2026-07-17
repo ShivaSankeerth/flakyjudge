@@ -8,25 +8,28 @@ Natural-language unit tests — discrete assertions like *"Does the response
 cite the refund window?"* scored by a judge model — are an increasingly
 popular interface for evaluating LLM outputs (LMUnit, TICK, checklist evals).
 The paradigm's implicit promise is that the criterion's *meaning*, not its
-*wording*, determines the score. We test that promise with five judges in
-three model families on FLASK items (n = 68–78 complete-matrix items per
+*wording*, determines the score. We test that promise with six judges in
+four model families on FLASK items (n = 68–78 complete-matrix items per
 judge, drawn from a 150-item preregistered sample). **Rewording a criterion
-flips the pass/fail verdict on 14–25% of items** (Wilson 95% CIs roughly
+flips the pass/fail verdict on 13–25% of items** (Wilson 95% CIs roughly
 ±8–11 points; judge-vs-judge differences are not distinguishable at this n).
 Under matched-k definitions this is **4–18× each judge's identical-input
-resampling flip rate**. Flips concentrate on items near the decision
+resampling flip rate** — and one judge (gemini flash-lite) is perfectly
+deterministic under T=0 resampling (0 flips in 500 repeat pairs) yet still
+flips 12.8% of verdicts under rewording, cleanly separating wording
+sensitivity from sampling noise. Flips concentrate on items near the decision
 threshold (29–40% vs 4–13% on clear verdicts, a 2–7× concentration):
 criterion wording acts as a hidden decision threshold. Deliberately
 meaning-changed control criteria flip 3.6–6.4× more than true paraphrases
-for all four large judges — and expose that the apparently most "stable"
+for all five large judges — and expose that the apparently most "stable"
 judge (llama-3.1-8b, control/paraphrase ratio 1.1) is stable because it
 barely reads the criterion at all. In contrast, we observe **no verbosity
 bias that survives multiple-comparison correction in any family**:
 with Holm correction applied symmetrically, equivalence within ±0.25
-points is established in 3 of 10 judge×condition cells (7 of 10
-uncorrected), the remaining cells inconclusive, and the one nominally
-significant effect (gpt-4o favoring condensed responses) does not survive
-correction. A
+points is established in 2 of 12 judge×condition cells (8 of 12
+uncorrected), the remaining cells inconclusive, and no drift in any cell
+survives correction (smallest corrected p = 0.07 — gemini's *negative*
+drift under padding, a padding penalty, not a halo). A
 scoring-mode ablation shows logprob-weighted expectation scoring barely
 moves GPT-4o-class judges (Δρ +0.01–0.02, CIs crossing zero) but transforms
 the small open judge (llama-8b: Δρ +0.23, CI [+0.17, +0.29]); contrary to
@@ -80,7 +83,7 @@ candidates (cosine 0.70–0.80) are admitted via a bidirectional
 semantic-equivalence adjudication and tracked as a second tier, with all
 headline analyses run both ways (§3.3). The preregistered 10% spot-check
 (112 variants) was performed by an LLM reviewer (a Claude model that is
-not one of the five judges, though it shares a vendor family with two of
+not one of the judges, though it shares a vendor family with two of
 them — see §5) with per-row verdicts recorded in
 `data/spot_check_sample.jsonl`: 79/83 true paraphrases judged equivalent
 (4.8% failure), and all 29 controls in the sample correctly judged
@@ -91,10 +94,14 @@ unchanged (§3.3). Verbosity variants pass a strict bidirectional claim
 audit; rejects were verified to be genuine content changes.
 
 **Judges.** gpt-4o (2024-11-20), gpt-4o-mini (2024-07-18),
-claude-sonnet-4-6, claude-haiku-4-5 (20251001), llama-3.1-8b-instruct
-(OpenRouter, provider pinned) — T=0, single frozen system prompt,
-direct-digit plus logprob-weighted scores where the API exposes logprobs.
-Gemini was excluded (free-tier rate limits; documented amendment). Format
+claude-sonnet-4-6, claude-haiku-4-5 (20251001), gemini-flash-lite (rolling
+alias — no pinned snapshot exists for this account tier; served model
+recorded per call), llama-3.1-8b-instruct (OpenRouter, provider pinned) —
+T=0, single frozen system prompt, direct-digit plus logprob-weighted
+scores where the API exposes logprobs. Gemini was initially excluded on
+free-tier rate limits and re-included after a paid-tier upgrade
+(documented amendment); it was added after the spot-check review, whose
+reviewer is not any judge under test. Format
 compliance is itself a result: claude-sonnet ignores the bare-digit
 instruction on ~10% of calls (haiku ~1.5%, OpenAI and Llama ~0%); an
 extended-token reissue salvaged 61% of Sonnet's failures, and §3.3 shows
@@ -109,32 +116,37 @@ fraction of items whose verdict is not unanimous across k wordings
 (mechanically grows with k, so cross-condition comparisons use matched k);
 **per-variant** = mean disagreement between one variant and the original.
 
-| | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | llama-8b |
-|---|---|---|---|---|---|
-| n (complete matrix) | 78 | 78 | 68 | 78 | 78 |
-| Any-of-7 paraphrase flip [95% CI] | 20.5% [13, 31] | 14.1% [8, 24] | 25.0% [16, 36] | 20.5% [13, 31] | 5.1% [2, 12] |
-| Any-of-5 paraphrase flip (matched k) | 16.2% | 10.8% | 20.6% | 16.9% | 4.6% |
-| Any-of-5 resample floor (T=0) | 4.0% | 2.0% | 1.1% | 1.0% | 1.0% |
-| **Matched-k ratio** | **4.1×** | **5.4×** | **18.3×** | **16.9×** | 4.6× |
-| Per-variant: paraphrase / floor | 5.6 / 2.5% | 3.9 / 1.2% | 8.2 / 0.8% | 6.2 / 0.8% | 2.2 / 0.8% |
+| | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | gemini-flash | llama-8b |
+|---|---|---|---|---|---|---|
+| n (complete matrix) | 78 | 78 | 68 | 78 | 78 | 78 |
+| Any-of-7 paraphrase flip [95% CI] | 20.5% [13, 31] | 14.1% [8, 24] | 25.0% [16, 36] | 20.5% [13, 31] | 12.8% [7, 22] | 5.1% [2, 12] |
+| Any-of-5 paraphrase flip (matched k) | 16.2% | 10.8% | 20.6% | 16.9% | 11.4% | 4.6% |
+| Any-of-5 resample floor (T=0) | 4.0% | 2.0% | 1.1% | 1.0% | 0.0% | 1.0% |
+| **Matched-k ratio** | **4.1×** | **5.4×** | **18.3×** | **16.9×** | undefined* | 4.6× |
+| Per-variant: paraphrase / floor | 5.6 / 2.5% | 3.9 / 1.2% | 8.2 / 0.8% | 6.2 / 0.8% | 5.3 / 0.0% | 2.2 / 0.8% |
+
+\* gemini produced zero flips across all T=0 resample pairs (floor Wilson
+CI [0, 3.7%]) — the ratio is undefined; at the floor CI's upper bound it
+would be ≥3.1×. Its 11.4% paraphrase flip rate on a 0.0% measured floor is
+the cleanest wording-vs-sampling separation in the study.
 
 At these sample sizes the judge-vs-judge ordering is **not** established —
-the CIs overlap heavily; the supported claim is that all four large judges
-flip in the 14–25% range, far above their floors.
+the CIs overlap heavily; the supported claim is that all five large judges
+flip in the 13–25% range, far above their floors.
 
 **Instrument resolution (preregistered validity control #3), evaluated
 formally with matched per-variant definitions** — control flip vs
 paraphrase flip, both per-variant vs original:
 
-| | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | llama-8b |
-|---|---|---|---|---|---|
-| Paraphrase (per-variant) | 5.6% | 3.9% | 8.2% | 6.2% | 2.2% |
-| Meaning-changed control (per-variant) | 21.3% | 14.0% | 34.6% | 39.5% | 2.3% |
-| Ratio | 3.8 | 3.6 | 4.2 | 6.4 | **1.1** |
+| | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | gemini-flash | llama-8b |
+|---|---|---|---|---|---|---|
+| Paraphrase (per-variant) | 5.6% | 3.9% | 8.2% | 6.2% | 5.3% | 2.2% |
+| Meaning-changed control (per-variant) | 21.3% | 14.0% | 34.6% | 39.5% | 19.3% | 2.3% |
+| Ratio | 3.8 | 3.6 | 4.2 | 6.4 | 3.6 | **1.1** |
 
 The pass criterion (control > 1.5× paraphrase) is a post-hoc formalization
 of the preregistered "substantially exceeds" — but the pattern is not
-subtle: every large judge clears 3.6×, and llama-8b sits at 1.1×. Its low
+subtle: all five large judges clear 3.6×, and llama-8b sits at 1.1×. Its low
 paraphrase flip rate reflects insensitivity to the criterion, not
 robustness. (Controls also shift raw scores 3–4× more than paraphrases for
 the large judges.)
@@ -150,7 +162,7 @@ gpt-4o-mini (|Δ| 0.42) and claude-haiku (0.35); form changes
 **The T=1 noise floor is a finding of its own.** All scoring in E1/E3/E4
 ran at temperature 0, so the T=0 floor is the matched baseline above. But
 the preregistered T=1 floor deserves its own line: identical-input
-resampling at T=1 flips 10–24% of verdicts (gpt-4o 19%, llama 24%) —
+resampling at T=1 flips 7–24% of verdicts (gpt-4o 19%, llama 24%) —
 rivaling paraphrase sensitivity itself. If you run a judge at nonzero
 temperature, sampling noise alone can dominate everything this study
 measures. (This also means the "4–18×" multiplier is specific to T=0
@@ -166,19 +178,21 @@ sensitivity, echoing [2]'s response-level finding.
 
 Per-judge paired drifts (variant − original; per-cell n = 71–82 after the
 claim audit), with 95% CIs and Holm step-down correction applied
-symmetrically to BOTH ten-test families — the Wilcoxon difference tests
+symmetrically to BOTH twelve-test families — the Wilcoxon difference tests
 and the TOST equivalence tests (±0.25-point bound, chosen post-hoc; the
 preregistered design detects ~0.16 at n=150, the realized n detects
 ~0.22–0.24):
 
-| drift | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | llama-8b |
-|---|---|---|---|---|---|
-| Padded 1.84× | +0.01 [−0.20, +0.23] | −0.13 [−0.40, +0.13] | −0.12 [−0.25, +0.01] | −0.11 [−0.32, +0.10] | +0.09 [−0.04, +0.21]ᴱ |
-| Condensed 0.54× | +0.23 [+0.04, +0.43] | −0.05 [−0.18, +0.08]ᴱ | −0.11 [−0.24, +0.02] | +0.05 [−0.17, +0.26] | +0.00 [−0.11, +0.11]ᴱ |
+| drift | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | gemini-flash | llama-8b |
+|---|---|---|---|---|---|---|
+| Padded 1.84× | +0.01 [−0.20, +0.23] | −0.13 [−0.40, +0.13] | −0.12 [−0.25, +0.01] | −0.11 [−0.32, +0.10] | −0.27 [−0.46, −0.08] | +0.09 [−0.04, +0.21] |
+| Condensed 0.54× | +0.23 [+0.04, +0.43] | −0.05 [−0.18, +0.08]ᴱ | −0.11 [−0.24, +0.02] | +0.05 [−0.17, +0.26] | +0.05 [−0.17, +0.26] | +0.00 [−0.11, +0.11]ᴱ |
 
-ᴱ = equivalence within ±0.25 established after Holm correction (3 of 10
-cells; 7 of 10 before correction). **No drift in any cell survives Holm
-correction either** (smallest corrected p = 0.28, gpt-4o condensed). The
+ᴱ = equivalence within ±0.25 established after Holm correction (2 of 12
+cells; 8 of 12 before correction). **No drift in any cell survives Holm
+correction either** (smallest corrected p = 0.071 — and that near-miss is
+gemini's *negative* padded drift: the only marginal length effect in the
+study is a padding penalty, not a halo). The
 honest summary: we detect no verbosity bias in any family, but with
 corrected equivalence established in only 3 cells, most cells are
 *inconclusive* — consistent with no bias, insufficient to prove its
@@ -225,7 +239,7 @@ All numbers regenerable via `analysis/supplementary.py` →
 
 ### 3.4 Anchors and scoring-mode ablations (E1)
 
-Judge–human Spearman ρ: 0.54–0.70 for the four large judges (best:
+Judge–human Spearman ρ: 0.54–0.70 for the five large judges (best:
 claude-sonnet 0.69–0.70 on FLASK) vs llama-8b's 0.06–0.23 direct-scored.
 For context, FLASK's leave-one-annotator-out agreement is ρ ≈ 0.56 — note
 this is a *different statistic* (single annotator vs the other two) than
@@ -242,8 +256,8 @@ together. Secondary findings:
   to usable (ρ≈0.43). It does not, however, reduce paraphrase flip rates
   for the large judges (§3.3).
 - **Rubrics make every judge harsher, but improve validity only for one:**
-  appending the FLASK rubric+reference shifts scores down for all five
-  judges (−0.11 to −0.36, CIs exclude zero) while the correlation gain is
+  appending the FLASK rubric+reference shifts scores down for all six
+  judges (−0.11 to −0.36) while the correlation gain is
   ~zero for the OpenAI judges (Δρ +0.001 / +0.034, CIs crossing zero),
   marginal for claude-haiku (+0.039 [−0.001, +0.080]), and real for
   claude-sonnet (+0.060 [+0.027, +0.095]). "Rubrics don't help" is
@@ -273,8 +287,8 @@ together. Secondary findings:
 
 ## 5. Limitations
 
-Five judges across three families (Gemini excluded by free-tier rate
-limits); FLASK-only for the headline experiments (E1 also covers
+Six judges across four families (gemini via a rolling alias with no
+pinned snapshot — served model recorded per call); FLASK-only for the headline experiments (E1 also covers
 BiGGen-Bench); FLASK items and human labels may be in judges' training
 data (the perturbation experiments are contamination-resistant by
 construction, the E1 correlations less so). n = 68–78 complete-matrix

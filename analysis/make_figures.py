@@ -34,6 +34,7 @@ JUDGE_COLORS = {
     "gpt-4o-mini": "#1baf7a",   # slot 2 aqua
     "claude-sonnet": "#eda100", # slot 3 yellow
     "claude-haiku": "#4a3aa7",  # slot 5 violet
+    "gemini-flash": "#008300",  # slot 4 green
     "llama-8b": "#e34948",      # slot 6 red
 }
 JUDGE_ORDER = list(JUDGE_COLORS)

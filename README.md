@@ -16,16 +16,20 @@ its meaning, does the verdict change?
 results, practical guidance, limitations.
 
 > Experimental design frozen in [PREREGISTRATION.md](https://github.com/ShivaSankeerth/flakyjudge/blob/main/PREREGISTRATION.md).
-> Five judges across three families: gpt-4o, gpt-4o-mini, claude-sonnet-4-6,
-> claude-haiku-4-5, llama-3.1-8b. ~24,000 scored triples, $19 total spend.
+> Six judges across four families: gpt-4o, gpt-4o-mini, claude-sonnet-4-6,
+> claude-haiku-4-5, gemini-flash-lite, llama-3.1-8b. ~29,000 scored
+> triples, $19 total spend.
 
 ## Findings
 
-- **Rewording a unit test flips its pass/fail verdict on 14–25% of items**
+- **Rewording a unit test flips its pass/fail verdict on 13–25% of items**
   (n=68–78 per judge; Wilson 95% CIs ±8–11 points, so the judge-vs-judge
   ordering is not established) — **4–18× each judge's identical-input
   resampling flip rate** under matched-k definitions (T=0; at T=1,
-  sampling noise alone rivals the wording effect).
+  sampling noise alone rivals the wording effect). One judge
+  (gemini-flash-lite) is perfectly deterministic under resampling — 0
+  flips in 500 repeat pairs — yet flips 12.8% of verdicts under
+  rewording.
 - **Criterion wording acts as a hidden decision threshold:** flips
   concentrate ~2–7× on items whose scores sit near the pass/fail cut
   (29–40%) vs clear verdicts (4–13%).
@@ -33,15 +37,17 @@ results, practical guidance, limitations.
   ![Flip rates vs noise floor and controls](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig2_flip_rates.png)
 - **"Stability" without validity is insensitivity — the controls catch it:**
   llama-8b looks most stable under paraphrase, but its meaning-*changed*
-  control flip rate is only 1.1× its paraphrase rate (the four large
+  control flip rate is only 1.1× its paraphrase rate (the five large
   judges: 3.6–6.4×) — it isn't robust, it isn't reading the criterion.
 
   ![Which rewordings move the score](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig3_mechanism.png)
 - **No detectable verbosity bias in any family:** content-matched 1.8×
   padding produces no drift that survives multiple-comparison correction;
   with the same correction applied to the equivalence tests, formal
-  equivalence within ±0.25 points holds in 3 of 10 judge×condition cells
-  (7 of 10 uncorrected) — the rest are inconclusive, not positive. The
+  equivalence within ±0.25 points holds in 2 of 12 judge×condition cells
+  (8 of 12 uncorrected) — the rest are inconclusive, not positive. The
+  only marginal length effect anywhere is gemini *penalizing* padding
+  (−0.27, corrected p = 0.07). The
   length halo documented for holistic/pairwise judging does not appear in
   this criterion-anchored setting (no within-study holistic arm, so no
   causal claim).
@@ -65,9 +71,9 @@ results, practical guidance, limitations.
 
 ## What this is
 
-An empirical robustness study across 5 judge models in 3 families (GPT-4o,
-GPT-4o-mini, Claude Sonnet 4.6, Claude Haiku 4.5, Llama-3.1-8B) on FLASK
-and BiGGen-Bench items, plus a small library implementing the measurement
+An empirical robustness study across 6 judge models in 4 families (GPT-4o,
+GPT-4o-mini, Claude Sonnet 4.6, Claude Haiku 4.5, Gemini Flash-Lite,
+Llama-3.1-8B) on FLASK and BiGGen-Bench items, plus a small library implementing the measurement
 tools and mitigations:
 
 - **E1** — judge-human correlation anchor; logprob-weighted vs. direct scoring

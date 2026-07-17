@@ -34,21 +34,18 @@ judges:
     price_in_per_mtok: 0.15
     price_out_per_mtok: 0.60
     supports_logprobs: true
-  # gemini-2.0/2.5 flash are closed to new API accounts (free-tier quota 0 /
-  # NOT_FOUND); the only stable non-thinking option is the rolling
-  # flash-lite alias. No pinned snapshot exists for new users - the served
-  # `model` field is recorded per call as provenance instead. Free tier:
-  # $0 actual cost, tight rate limits (runner backoff + cache resume).
-  # EXCLUDED from the study (documented in PREREGISTRATION.md): new API
-  # accounts get 15 requests/minute on the only accessible model alias,
-  # infeasible within the study window. Config kept for future use.
+  # Rolling alias (gemini 2.0/2.5 flash are closed to new API accounts; no
+  # pinned snapshot exists for this account tier). The served `model` field
+  # is recorded per call as provenance. Initially excluded on the free tier
+  # (15 RPM); re-included 2026-07-17 after upgrading to paid tier 1 - see
+  # PREREGISTRATION.md.
   gemini-flash:
     provider: openai-compat
     model: gemini-flash-lite-latest
     base_url: https://generativelanguage.googleapis.com/v1beta/openai
     api_key_env: GEMINI_API_KEY
-    price_in_per_mtok: 0.0
-    price_out_per_mtok: 0.0
+    price_in_per_mtok: 0.10
+    price_out_per_mtok: 0.40
     supports_logprobs: false
   # Amendment (pre-run for this judge): originally qwen/qwen-2.5-7b-instruct,
   # but no OpenRouter provider serves it with valid logprobs (Phala returns

@@ -37,7 +37,8 @@ from flakyjudge.prompts import build_prompt
 PARA_TYPES = ["lexical", "syntactic", "register_formal", "register_casual",
               "form_question", "form_imperative"]
 CONTROLS = ["control_negated", "control_swapped"]
-JUDGES = ["gpt-4o", "gpt-4o-mini", "claude-sonnet", "claude-haiku", "llama-8b"]
+JUDGES = ["gpt-4o", "gpt-4o-mini", "claude-sonnet", "claude-haiku",
+          "gemini-flash", "llama-8b"]
 MODEL_OF = {"claude-sonnet": "claude-sonnet-4-6",
             "claude-haiku": "claude-haiku-4-5-20251001"}
 TOST_BOUND = 0.25
