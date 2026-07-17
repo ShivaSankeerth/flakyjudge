@@ -90,10 +90,17 @@ polarity+length are admitted if a bidirectional semantic-equivalence check
 (96 of 1,200 variants). All E3 analyses are run twice — strict-only and
 strict+adjudicated — as a sensitivity analysis.
 
-**Spot-check completion note (2026-07-16):** the preregistered 10% manual
-review (data/spot_check_sample.jsonl, 112 variants) was completed by the
-author; no meaning-changing paraphrases were flagged among the admitted
-variants.
+**Spot-check note (2026-07-16, superseded 2026-07-17):** an initial
+author sign-off was recorded without per-row verdicts. It was superseded
+by a full per-row review of all 112 sampled variants by an LLM reviewer
+(Claude, independent of the five judges under test), with verdicts,
+reviewer, and date recorded in data/spot_check_sample.jsonl: 79/83 true
+paraphrases equivalent (4 non-equivalent, 4.8%), all 29 controls correctly
+non-equivalent. The dominant failure mode (a spatial->physical scope shift
+in one shared FLASK criterion) affects 22/136 lexical variants
+population-wide; a drift-exclusion sensitivity analysis is reported in the
+tech report (conclusions unchanged). The review is LLM-based and
+unblinded, stated as a limitation.
 
 **Judge lineup amendment (pre-run for the affected judge):** the small
 open-model slot changes from qwen-2.5-7b to llama-3.1-8b-instruct
@@ -136,3 +143,30 @@ study window without paid quota. Final lineup: 5 judges across 3 families
 
 Hard cap $50 (enforced in code via FLAKYJUDGE_MAX_SPEND_USD); estimated
 ~19,500 calls, ~$23 raw.
+
+## Deviations and completion addendum (2026-07-17)
+
+Differences between this plan and the realized study, in one place:
+
+1. Realized headline n: 68-78 complete-matrix items per judge (of 150
+   sampled); the power targets above (ICC CI half-width ~0.05-0.06) were
+   therefore not met. Wilson CIs are reported instead.
+2. E4 realized n: 82/150 pairs per kind survived the claim audit;
+   detectable effect ~dz 0.31, not the planned 0.23.
+3. Final lineup: 5 judges (design tables above say 6; Gemini excluded per
+   amendment).
+4. E1 n = 998, not 1,000 (proportional-allocation rounding).
+5. Analyses added post-hoc, labeled as such in the report: matched-k flip
+   comparison, Wilson CIs, Holm correction and TOST equivalence (bound
+   +/-0.25) for E4, formalized resolution criterion (control > 1.5x
+   paraphrase), spot-check drift-exclusion sensitivity.
+6. Preregistered analyses initially missing from the report, now included
+   (report section 3.3): two-tier and salvage sensitivity, logprob-vs-direct
+   flip rates, k-sample averaging, variance decomposition, field-reorder
+   results.
+7. Hypothesis outcomes: H1 supported (excess flips, threshold
+   concentration). H2 not supported (no length-ratio correlation; no
+   family-specific direction). H3 partially supported: logprob weighting
+   improves human-correlation for the small judge only, does not reduce
+   large-judge flip rates, and k-sample averaging recovers less than half
+   of the logprob benefit.

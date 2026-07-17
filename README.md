@@ -22,33 +22,40 @@ results, practical guidance, limitations.
 ## Findings
 
 - **Rewording a unit test flips its pass/fail verdict on 14–25% of items**
-  (sonnet 25%, gpt-4o & haiku 20.5%, mini 14.1%) — 5–20× each judge's
-  identical-input resampling noise floor (0.8–4%).
+  (n=68–78 per judge; Wilson 95% CIs ±8–11 points, so the judge-vs-judge
+  ordering is not established) — **4–19× each judge's identical-input
+  resampling flip rate** under matched-k definitions.
 - **Criterion wording acts as a hidden decision threshold:** flips
   concentrate ~3–7× on items whose scores sit near the pass/fail cut
   (29–40%) vs clear verdicts (5–13%).
 
   ![Flip rates vs noise floor and controls](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig2_flip_rates.png)
 - **"Stability" without validity is insensitivity — the controls catch it:**
-  llama-8b looks most stable under paraphrase (5% flips) but barely reacts
-  to deliberately meaning-*changed* criteria either (1–3% vs Claude's
-  47–54%) — it isn't robust, it isn't reading the criterion. Every real
-  judge shifts 3–4× more on controls than on true paraphrases.
+  llama-8b looks most stable under paraphrase, but its meaning-*changed*
+  control flip rate is only 1.1× its paraphrase rate (the four large
+  judges: 3.6–6.4×) — it isn't robust, it isn't reading the criterion.
 
   ![Which rewordings move the score](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig3_mechanism.png)
-- **The classic verbosity bias disappears under criterion-anchored judging,
-  in every family:** content-matched 1.8× padding produces no significant
-  positive drift for any judge; gpt-4o *rewards concision* (+0.23,
-  p=0.03) and Claude trends mildly negative. The length halo documented
-  for holistic/pairwise judging does not survive decomposition.
+- **No detectable verbosity bias in any family:** content-matched 1.8×
+  padding produces no drift that survives multiple-comparison correction;
+  formal equivalence within ±0.25 points holds in 7 of 10 judge×condition
+  cells (TOST). The length halo documented for holistic/pairwise judging
+  does not appear in this criterion-anchored setting (no within-study
+  holistic arm, so no causal claim).
+- **Field order rivals wording:** mechanically reordering the prompt
+  fields flips 7–14% of verdicts — format sensitivity on par with
+  paraphrase sensitivity.
 - **The logprob-weighted scoring trick is a small-model story:** it buys
   +0.01–0.02 Spearman for GPT-4o-class judges (CIs cross zero) but
   **+0.23** for llama-8b (CI [+0.17, +0.29]) — rescuing it from ρ≈0.13 to
-  ρ≈0.43. Expectation-scoring is what makes small judges usable.
+  ρ≈0.43. Repeat-sampling recovers less than half of that benefit, and
+  logprob scoring does not reduce large-judge flip rates.
 - **Validity and stability don't come together:** claude-sonnet is the
-  most human-aligned judge (ρ=0.69 vs the 0.56 human-agreement ceiling)
-  AND the most paraphrase-flippy (25%) — and the least format-compliant
-  (~10% of calls ignore the bare-digit instruction; OpenAI judges: 0%).
+  most human-aligned judge (ρ=0.69–0.70; for context, single-annotator
+  agreement on FLASK is ρ≈0.56 — a different statistic, not a ceiling
+  judges "beat") and also among the most paraphrase-sensitive — and the
+  least format-compliant (~10% of calls ignore the bare-digit
+  instruction; OpenAI judges: 0%).
 - **Rubrics make judges harsher, not more valid:** appending the FLASK
   rubric+reference shifts scores −0.25 to −0.29 with ~no correlation gain.
 
@@ -72,9 +79,11 @@ of the unit-test paradigm ([LMUnit](https://arxiv.org/abs/2412.13091)).
 ## Use the mitigation: `pip install flakyjudge`
 
 Our headline finding is that single-shot verdicts silently depend on how
-you worded the assertion. `ensemble_score()` makes that visible: it scores
-your criterion plus n auto-generated meaning-preserving rewordings and
-reports the spread.
+you worded the assertion. `ensemble_score()` makes that instability
+visible: it scores your criterion plus n auto-generated meaning-preserving
+rewordings and reports the spread. (Whether ensembling also improves
+agreement with humans is untested here — what it demonstrably does is
+surface wording-dependence that single-shot scoring hides.)
 
 ```python
 from flakyjudge import ensemble_score

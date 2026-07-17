@@ -8,30 +8,29 @@ Natural-language unit tests — discrete assertions like *"Does the response
 cite the refund window?"* scored by a judge model — are an increasingly
 popular interface for evaluating LLM outputs (LMUnit, TICK, checklist evals).
 The paradigm's implicit promise is that the criterion's *meaning*, not its
-*wording*, determines the score. We test that promise. Across 150 FLASK items
-with six typed, validity-gated paraphrases per unit test and five judges in
-three model families, **rewording a criterion flips the pass/fail verdict
-on 14–25% of items** (claude-sonnet 25.0%, gpt-4o and claude-haiku 20.5%,
-gpt-4o-mini 14.1%) — 5–20× each judge's identical-input resampling noise
-floor (0.8–4.0%). Flips concentrate ~3–7× on items whose scores sit near
-the decision threshold: criterion wording acts as a hidden decision
-threshold. The positive controls expose a subtler failure: llama-3.1-8b
-appears most "stable" (5.1% flips) while barely reacting to deliberately
-meaning-changed criteria (1–3% vs Claude's 47–54%) — stability without
-criterion sensitivity is just not reading the test. In contrast, the well-documented verbosity bias of
-holistic and pairwise judging **largely disappears** under criterion-anchored
-judging in every family: content-matched 1.8× padding produces no
-significant positive drift for any judge; gpt-4o *rewards concision*
-(+0.23 for 0.54× condensed variants, p = 0.03) and Claude trends mildly
-negative in both directions. A scoring-mode ablation adds a practical
-result: logprob-weighted expectation scoring barely helps GPT-4o-class
-judges (Δρ +0.01–0.02, CIs crossing zero) but transforms the small open
-judge (llama-8b: Δρ +0.23, CI [+0.17, +0.29], from ρ≈0.13 to ρ≈0.43).
-Together: decomposed judging shields judges from the length halo but
-introduces a wording-sensitivity failure mode that practitioners should
-mitigate — we discuss paraphrase-ensemble scoring and threshold-margin
-reporting. All results reproduce from a committed API-response cache with
-zero API keys (`make figures`).
+*wording*, determines the score. We test that promise with five judges in
+three model families on FLASK items (n = 68–78 complete-matrix items per
+judge, drawn from a 150-item preregistered sample). **Rewording a criterion
+flips the pass/fail verdict on 14–25% of items** (Wilson 95% CIs roughly
+±8–11 points; judge-vs-judge differences are not distinguishable at this n).
+Under matched-k definitions this is **4–19× each judge's identical-input
+resampling flip rate**. Flips concentrate on items near the decision
+threshold (29–40% vs 5–13% on clear verdicts, a 2–8× concentration):
+criterion wording acts as a hidden decision threshold. Deliberately
+meaning-changed control criteria flip 3.6–6.4× more than true paraphrases
+for all four large judges — and expose that the apparently most "stable"
+judge (llama-3.1-8b, control/paraphrase ratio 1.1) is stable because it
+barely reads the criterion at all. In contrast, we observe **no verbosity
+bias that survives multiple-comparison correction in any family**:
+equivalence within ±0.25 points is established (TOST) in 7 of 10
+judge×condition cells, and the one nominally significant effect (gpt-4o
+favoring condensed responses) does not survive Holm correction. A
+scoring-mode ablation shows logprob-weighted expectation scoring barely
+moves GPT-4o-class judges (Δρ +0.01–0.02, CIs crossing zero) but transforms
+the small open judge (llama-8b: Δρ +0.23, CI [+0.17, +0.29]); contrary to
+our preregistered hypothesis, k-sample averaging recovers less than half of
+that benefit. All results reproduce from a committed API-response cache
+with zero API keys (`make cache-unpack && make figures`).
 
 ## 1. Motivation
 
@@ -49,145 +48,221 @@ assumption, and [2] explicitly names it as unmeasured. We measure it.
 
 ## 2. Study design
 
-Preregistered in [`PREREGISTRATION.md`](../PREREGISTRATION.md) (hypotheses,
-sample sizes, metrics frozen before data collection; all amendments are
-pre-scoring and documented inline). Four experiments, all using LMUnit's
-exact prompt template and its 2.5 pass/fail threshold [1] so results are
-comparable to the paper's:
+Preregistered in [`PREREGISTRATION.md`](../PREREGISTRATION.md) — hypotheses,
+sample sizes, and metrics were frozen before data collection; **all
+amendments predate the analysis they affect and are documented inline**,
+and a dated deviations addendum lists every difference between the plan and
+what was realized. Four experiments, all using LMUnit's exact prompt
+template and its 2.5 pass/fail threshold [1]:
 
 - **E1 (anchor):** 998 items (FLASK + BiGGen-Bench, seeded stratified
-  sample) × 2 prompt modes (bare assertion vs. LMUnit-parity
-  rubric+reference). Sanity gate: judge–human correlation must land in a
-  plausible band vs. published numbers before any perturbation runs.
+  sample; 998 rather than 1,000 due to proportional-allocation rounding) ×
+  2 prompt modes (bare assertion vs. LMUnit-parity rubric+reference).
+  Sanity gate: judge–human correlation must land in a plausible band vs.
+  published numbers before any perturbation runs.
 - **E2 (noise floor):** 100 items × 5 identical-input repeats at T=0 and
   T=1, plus a field-reordering variant. Every perturbation effect is
-  reported as **excess over this floor** — without it, paraphrase variance
-  is uninterpretable.
-- **E3 (headline):** 150 items × 6 typed meaning-preserving paraphrases of
-  the unit test (lexical, syntactic, formal/casual register,
-  question/imperative form) + 2 **positive controls** per item (negated and
-  swapped criteria) that *should* flip — proving the instrument
-  distinguishes rewording from real semantic change.
-- **E4 (verbosity):** content-matched padded (realized 1.84×) and condensed
-  (0.54×) response variants, scored against the original criterion.
+  reported against this floor.
+- **E3 (headline, FLASK only):** 150 items × 6 typed meaning-preserving
+  paraphrases of the unit test + 2 **positive controls** per item (negated
+  and swapped criteria) that *should* flip. Complete-matrix analysis
+  retains 78 items (68 for claude-sonnet; see §5 on the selection this
+  induces).
+- **E4 (verbosity, FLASK only):** content-matched padded (realized 1.84×)
+  and condensed (0.54×) response variants; 82 of 150 pairs per kind
+  survived the claim audit, so the realized design detects |dz| ≥ ~0.31.
 
 **Perturbation validity.** Paraphrases pass automated gates (embedding
-cosine ≥ 0.80, polarity lexicon check, length ratio 0.5–2.0×); borderline
-candidates (cosine 0.70–0.80) are admitted only via a bidirectional
-semantic-equivalence adjudication and tracked as a second tier — all E3
-analyses run strict-only and combined (they agree: 20.8% vs 20.5% flip). A
-10% manual sample was reviewed by the author with no meaning changes
-flagged. Verbosity variants pass a strict bidirectional claim audit (nothing
-added, nothing dropped); only 82/150 per kind survived, and rejects were
-verified to be genuine content changes — the surviving pairs isolate length.
+cosine ≥ 0.80, polarity lexicon, length ratio 0.5–2.0×); borderline
+candidates (cosine 0.70–0.80) are admitted via a bidirectional
+semantic-equivalence adjudication and tracked as a second tier, with all
+headline analyses run both ways (§3.3). The preregistered 10% spot-check
+(112 variants) was performed by an LLM reviewer (Claude, independent of
+the five judges under test) with per-row verdicts recorded in
+`data/spot_check_sample.jsonl`: 79/83 true paraphrases judged equivalent
+(4.8% failure), and all 29 controls in the sample correctly judged
+non-equivalent. The dominant failure (a "spatial"→"physical reasoning"
+scope shift) affects 22/136 lexical variants population-wide; excluding
+them moves headline flip rates by at most 4 points with conclusions
+unchanged (§3.3). Verbosity variants pass a strict bidirectional claim
+audit; rejects were verified to be genuine content changes.
 
 **Judges.** gpt-4o (2024-11-20), gpt-4o-mini (2024-07-18),
 claude-sonnet-4-6, claude-haiku-4-5 (20251001), llama-3.1-8b-instruct
 (OpenRouter, provider pinned) — T=0, single frozen system prompt,
 direct-digit plus logprob-weighted scores where the API exposes logprobs.
-Gemini was excluded: Google's free tier for new accounts allows 15
-requests/minute on the only accessible alias (documented amendment).
-Format compliance is itself a result: claude-sonnet ignores the bare-digit
+Gemini was excluded (free-tier rate limits; documented amendment). Format
+compliance is itself a result: claude-sonnet ignores the bare-digit
 instruction on ~10% of calls (haiku ~1.5%, OpenAI and Llama ~0%); an
-extended-token reissue salvaged 61% of Sonnet's failures, and all Claude
-analyses run with and without salvage.
+extended-token reissue salvaged 61% of Sonnet's failures, and §3.3 shows
+the headline with and without salvage.
 
 ## 3. Results
 
 ### 3.1 Rewording flips verdicts far above the noise floor (E3 vs E2)
 
+Two flip-rate definitions are used and always labeled: **any-of-k** = the
+fraction of items whose verdict is not unanimous across k wordings
+(mechanically grows with k, so cross-condition comparisons use matched k);
+**per-variant** = mean disagreement between one variant and the original.
+
 | | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | llama-8b |
 |---|---|---|---|---|---|
-| Identical-input flip rate (T=0) | 4.0% | 2.0% | 1.1% | 1.0% | 1.0% |
-| Paraphrase flip rate (7 wordings) | **20.5%** | **14.1%** | **25.0%** | **20.5%** | 5.1%* |
-| Excess over floor | +16.5 | +12.1 | +23.9 | +19.5 | +4.1 |
-| Meaning-changed control flip (vs orig.) | 21% | 14% | 35% | 39% | 2%* |
-| ICC(2,1): resamples → paraphrases | 0.98→0.91 | 0.98→0.88 | 0.99→0.89 | 0.97→0.86 | 0.99→0.74 |
+| n (complete matrix) | 78 | 78 | 68 | 78 | 78 |
+| Any-of-7 paraphrase flip [95% CI] | 20.5% [13, 31] | 14.1% [8, 24] | 25.0% [16, 36] | 20.5% [13, 31] | 5.1% [2, 12] |
+| Any-of-5 paraphrase flip (matched k) | 16.2% | 10.8% | 20.6% | 16.9% | 4.6% |
+| Any-of-5 resample floor (T=0) | 4.0% | 2.0% | 1.1% | 1.0% | 1.0% |
+| **Matched-k ratio** | **4.1×** | **5.4×** | **19×** | **17×** | 4.6× |
+| Per-variant: paraphrase / floor | 5.6 / 2.5% | 3.9 / 1.2% | 8.2 / 0.8% | 6.2 / 0.8% | 2.2 / 0.8% |
 
-\* llama-8b fails the instrument-resolution check: its control flip rate
-is *below* its paraphrase flip rate — its apparent stability reflects
-insensitivity to the criterion, not robustness. Its per-item score SD
-still triples under paraphrase.
+At these sample sizes the judge-vs-judge ordering is **not** established —
+the CIs overlap heavily; the supported claim is that all four large judges
+flip in the 14–25% range, far above their floors.
 
-Per-variant verdict disagreement with the original wording: 0.8–2.5%
-(resampled identical input), 8.8–12.1% (meaning-preserving paraphrase),
-14–39% (meaning-*changed* controls, real judges). Controls shift scores
-3–4× more than true paraphrases for every judge that passes the resolution
-check.
+**Instrument resolution (preregistered validity control #3), evaluated
+formally with matched per-variant definitions** — control flip vs
+paraphrase flip, both per-variant vs original:
+
+| | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | llama-8b |
+|---|---|---|---|---|---|
+| Paraphrase (per-variant) | 5.6% | 3.9% | 8.2% | 6.2% | 2.2% |
+| Meaning-changed control (per-variant) | 21.3% | 14.0% | 34.6% | 39.5% | 2.3% |
+| Ratio | 3.8 | 3.6 | 4.2 | 6.4 | **1.1** |
+
+The pass criterion (control > 1.5× paraphrase) is a post-hoc formalization
+of the preregistered "substantially exceeds" — but the pattern is not
+subtle: every large judge clears 3.6×, and llama-8b sits at 1.1×. Its low
+paraphrase flip rate reflects insensitivity to the criterion, not
+robustness. (Controls also shift raw scores 3–4× more than paraphrases for
+the large judges.)
 
 **Mechanism: wording is a hidden threshold.** Flip rates split 29–40% on
-near-threshold items (|score − 2.5| ≤ 1) vs 5–13% on clear verdicts,
-consistently across families. When a response is borderline, *which
-paraphrase you happened to write* decides the eval. Casual-register
-rewrites are the most destabilizing single type for gpt-4o-mini (|Δ| 0.42)
-and claude-haiku (0.35); form changes (question/imperative) lead for
-gpt-4o and claude-sonnet.
+near-threshold items (|score − 2.5| ≤ 1) vs 5–13% on clear verdicts — a
+2–8× concentration, consistent across families. When a response is
+borderline, *which paraphrase you happened to write* decides the eval.
+Casual-register rewrites are the most destabilizing single type for
+gpt-4o-mini (|Δ| 0.42) and claude-haiku (0.35); form changes
+(question/imperative) lead for gpt-4o and claude-sonnet.
 
-### 3.2 Verbosity bias largely disappears under criterion anchoring (E4)
+**Field order matters as much as wording (E2b, previously unreported):**
+mechanically reordering the prompt fields (Unit Test / Query / Response
+instead of Query / Response / Unit Test) flips 7–14% of verdicts and moves
+scores |Δ| = 0.27–0.51 — format sensitivity on par with paraphrase
+sensitivity, echoing [2]'s response-level finding.
 
-| drift vs original | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | llama-8b |
+### 3.2 No detectable verbosity bias under criterion anchoring (E4)
+
+Per-judge paired drifts (variant − original), with 95% CIs, Holm-corrected
+Wilcoxon p over the 10-test family, and TOST equivalence vs a ±0.25-point
+bound (bound chosen post-hoc; the preregistered design detects ~0.16 at
+n=150, the realized n=82 detects ~0.22):
+
+| drift | gpt-4o | gpt-4o-mini | claude-sonnet | claude-haiku | llama-8b |
 |---|---|---|---|---|---|
-| Padded 1.84× | +0.01 | −0.13 | −0.12 | −0.11 | +0.09 |
-| Condensed 0.54× | **+0.23 (p=.03)** | −0.05 | −0.11 | +0.05 | +0.00 |
-| Elasticity (Δ/log ratio) | −0.16 | −0.08 | −0.02 | −0.10 | +0.06 |
+| Padded 1.84× | +0.01 [−0.20, +0.23]ᴱ | −0.13 [−0.40, +0.13] | −0.12 [−0.25, +0.01]ᴱ | −0.11 [−0.32, +0.10] | +0.09 [−0.04, +0.21]ᴱ |
+| Condensed 0.54× | +0.23 [+0.04, +0.43] | −0.05 [−0.18, +0.08]ᴱ | −0.11 [−0.24, +0.02]ᴱ | +0.05 [−0.17, +0.26]ᴱ | +0.00 [−0.11, +0.11]ᴱ |
 
-No judge in any family shows significant positive length drift. The length
-halo documented for holistic and pairwise judging [4, 7] does not appear;
-gpt-4o significantly *rewards concision*, and prior reports of Claude's
-concision preference [7] shrink to non-significance here.
-This supports the decomposition hypothesis — a narrow criterion appears to
-shield the judge from global length cues — and means the paradigm's
-trade-off is real: **unit-test judging fixes verbosity bias and introduces
-wording sensitivity.**
+ᴱ = equivalence within ±0.25 established (TOST p < .05). **No drift in any
+cell survives Holm correction** (smallest corrected p = 0.28, gpt-4o
+condensed). The honest summary: we detect no verbosity bias in any family,
+with formal equivalence established in 7 of 10 cells and the remaining 3
+inconclusive rather than positive. The preregistered H2 (drift correlates
+with log length ratio, direction family-specific) is **not supported**:
+elasticity slopes are −0.16 to +0.06, all p > 0.14. Because this is a
+cross-paper comparison (we did not run a holistic-judging arm), the claim
+is *"no detectable length halo in this criterion-anchored setting"* — not
+that decomposition causally removes it. The gpt-4o concision effect
+(+0.23, uncorrected p = .03) is suggestive at best.
 
-### 3.3 Anchors and scoring-mode ablations (E1)
+### 3.3 Robustness and supplementary analyses
+
+All numbers regenerable via `analysis/supplementary.py` →
+`results/supplementary.json`.
+
+- **Two-tier paraphrase gate:** strict-only vs strict+adjudicated any-of-7
+  flip rates agree within 2.3 points for every judge (e.g. gpt-4o 20.8% vs
+  20.5%; claude-sonnet 22.7% vs 25.0%).
+- **Salvage sensitivity:** claude-sonnet 25.0% without vs 24.6% with
+  extended-token salvage; claude-haiku unchanged (20.5%). No conclusion
+  depends on the rescue tier.
+- **Spot-check drift exclusion:** removing the 22 lexical variants with the
+  "spatial→physical" scope shift moves flip rates ≤4 points (e.g. haiku
+  20.5%→16.1%, gpt-4o 20.5%→21.4%); conclusions unchanged.
+- **Logprob scoring does not reduce flip rates for large judges** (gpt-4o
+  20.5%→19.2%, mini 14.1%→15.4%) — H3's flip-rate prediction is not
+  supported there. llama-8b's logprob flips drop to 0% because expectation
+  scoring compresses its scores away from the threshold — stability again
+  without evidence of criterion sensitivity.
+- **k-sample averaging (H3) is refuted in its strong form:** on the E2
+  items, mean-of-5 sampling lifts llama-8b's ρ vs human from 0.12 to 0.26,
+  less than half of what logprob weighting achieves (0.43); for the four
+  large judges mean-of-5 changes ρ by <0.02.
+- **Variance decomposition:** wording variance exceeds the sampling floor
+  for every large judge (within-item wording variance 0.05–0.11 vs
+  sampling 0.001–0.01).
+
+### 3.4 Anchors and scoring-mode ablations (E1)
 
 Judge–human Spearman ρ: 0.54–0.70 for the four large judges (best:
-claude-sonnet at 0.69–0.70 on FLASK, near the 0.56 leave-one-annotator-out
-human ceiling), against llama-8b's 0.06–0.23 direct-scored — sanity gate
-passed for all large judges. Notably, the most human-aligned judge
-(sonnet) is also the most paraphrase-flippy and least format-compliant:
-validity and stability do not come together. Two secondary findings:
+claude-sonnet 0.69–0.70 on FLASK) vs llama-8b's 0.06–0.23 direct-scored.
+For context, FLASK's leave-one-annotator-out agreement is ρ ≈ 0.56 — note
+this is a *different statistic* (single annotator vs the other two) than
+judge-vs-consensus (a less noisy target), so judges exceeding 0.56 are not
+"better than human"; the number contextualizes how noisy the gold labels
+are. Sanity gate passed for all large judges. Notably, the most
+human-aligned judge (sonnet) is also among the most paraphrase-sensitive
+and the least format-compliant: validity and stability do not come
+together. Secondary findings:
 
 - **Logprob-weighted scoring is a small-model story:** Δρ = +0.013
   (gpt-4o) / +0.024 (gpt-4o-mini), CIs crossing zero — but **+0.232**
   (CI [+0.169, +0.295]) for llama-8b, lifting it from unusable (ρ≈0.13)
-  to usable (ρ≈0.43). G-Eval-style expectation scoring [8] is what makes
-  small judges viable, and is nearly free where logprobs are exposed.
-- **Rubrics make judges harsher, not more valid:** appending FLASK's rubric
-  and reference answer shifts scores −0.25 to −0.29 (CIs exclude zero) while
+  to usable (ρ≈0.43). It does not, however, reduce paraphrase flip rates
+  for the large judges (§3.3).
+- **Rubrics make judges harsher, not more valid:** appending the FLASK
+  rubric+reference shifts scores −0.25 to −0.29 (CIs exclude zero) while
   buying ~0 correlation gain (Δρ +0.001 / +0.034, CIs crossing zero).
 
 ## 4. Practical guidance
 
-1. **Report threshold margins, not just verdicts.** Most flips are
-   near-threshold; a verdict with |score − threshold| > 1 is ~3× more
-   stable. Treat borderline passes as borderline.
-2. **Ensemble over wordings for load-bearing criteria.** Scoring k
-   paraphrases and averaging directly attacks the dominant variance
-   component (wording, not sampling). At 5 paraphrases this costs 5× — use
-   it for gating evals, not exploratory ones.
-3. **Prefer cheap judges with repeats over expensive judges one-shot for
-   stability:** gpt-4o-mini's paraphrase flip rate (14.1%) is lower than
-   gpt-4o's (20.5%) in our data, and its noise floor is half — though its
-   human correlation is also lower; pick by whether validity or stability
-   binds.
-4. **Don't pay for rubrics reflexively** — in these datasets they shifted
-   the operating point without improving agreement with humans.
+1. **Report threshold margins, not just verdicts.** Flips concentrate 2–8×
+   on near-threshold items; a verdict with |score − threshold| > 1 is far
+   more trustworthy. Treat borderline passes as borderline.
+2. **Make wording sensitivity visible for load-bearing criteria.** Scoring
+   k paraphrases (the `flakyjudge.ensemble_score()` API implements this)
+   reveals when a verdict depends on phrasing. Note: whether ensembling
+   *reduces* error vs humans is untested here — what it demonstrably does
+   is surface instability that single-shot scoring hides.
+3. **Don't buy stability without checking sensitivity.** Always run
+   meaning-changed controls: the "most stable" judge in this study was the
+   one not reading the criterion.
+4. **If you must use a small judge, use logprob scoring, not repeat
+   sampling** — averaging 5 samples recovered less than half of the
+   logprob benefit.
+5. **Don't pay for rubrics reflexively** — here they shifted the operating
+   point without improving agreement with humans.
 
 ## 5. Limitations
 
 Five judges across three families (Gemini excluded by free-tier rate
-limits — documented amendment); FLASK items and
-human labels may be in judges' training data (perturbation experiments are
-contamination-resistant by construction, the E1 correlations less so);
-paraphrase generation and claim auditing use LLMs (mitigated by typed gates,
-positive controls, tier sensitivity analysis, and manual review, but not
-eliminated); human "ground truth" itself has a ceiling of ρ ≈ 0.56; n = 78
-complete-matrix items for the headline (CIs in
-[`analysis/`](../analysis)); single frozen prompt per judge — prompt-tuning
-could shift absolute levels, though the *within-judge* contrasts are what
-the claims rest on.
+limits); FLASK-only for the headline experiments (E1 also covers
+BiGGen-Bench); FLASK items and human labels may be in judges' training
+data (the perturbation experiments are contamination-resistant by
+construction, the E1 correlations less so). n = 68–78 complete-matrix
+items for the headline — half the preregistered 150, so the prereg's power
+targets were not met, and CIs are wide (±8–11 points). Matrix completeness
+is partly conditioned on claude-sonnet's own format compliance, a
+selection effect whose direction is unknown (though the salvage
+sensitivity bounds it). Paraphrase generation, the borderline-gate
+adjudication, and the spot-check all use LLMs; the adjudicator
+(gpt-4o-mini) is itself a judge under test — a circularity affecting 96 of
+1,200 variants, bounded by the strict-only sensitivity analysis; the
+spot-check found a 4.8% paraphrase failure rate whose dominant mode was
+excluded in sensitivity analysis. E4's 82/150 audit survivors are a
+selected subpopulation (responses paddable without adding claims). Human
+"gold" itself has ρ ≈ 0.56 single-annotator agreement. Single frozen
+prompt per judge: absolute levels could shift under prompt tuning, though
+the within-judge contrasts are what the claims rest on.
 
 ## References
 
