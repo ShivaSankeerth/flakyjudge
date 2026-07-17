@@ -115,6 +115,13 @@ Salvage recovered 186/304 sonnet and 11/54 haiku failures; the remainder
 were still mid-analysis at 256 tokens and stay missing. All Claude analyses
 are reported with and without salvaged scores.
 
+**Judge exclusion note (2026-07-16):** gemini-flash is excluded. Google's
+free tier for new API accounts exposes only a rolling model alias
+(resolving to gemini-3.1-flash-lite) at 15 requests/minute with older flash
+models closed to new users; the ~4,800-call suite is infeasible within the
+study window without paid quota. Final lineup: 5 judges across 3 families
+(OpenAI, Anthropic, Meta/open-weights).
+
 ## Primary metrics
 
 - Decision flip rate at the 2.5 pass/fail threshold (LMUnit's), reported as

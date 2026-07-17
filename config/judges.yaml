@@ -39,6 +39,9 @@ judges:
   # flash-lite alias. No pinned snapshot exists for new users - the served
   # `model` field is recorded per call as provenance instead. Free tier:
   # $0 actual cost, tight rate limits (runner backoff + cache resume).
+  # EXCLUDED from the study (documented in PREREGISTRATION.md): new API
+  # accounts get 15 requests/minute on the only accessible model alias,
+  # infeasible within the study window. Config kept for future use.
   gemini-flash:
     provider: openai-compat
     model: gemini-flash-lite-latest
