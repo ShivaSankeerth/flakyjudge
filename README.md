@@ -1,5 +1,7 @@
 # flakyjudge
 
+[![PyPI](https://img.shields.io/pypi/v/flakyjudge)](https://pypi.org/project/flakyjudge/) [![CI](https://github.com/ShivaSankeerth/flakyjudge/actions/workflows/ci.yml/badge.svg)](https://github.com/ShivaSankeerth/flakyjudge/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 **How stable are natural-language unit tests for LLM evals?**
 
 Teams increasingly evaluate LLM outputs with natural-language unit tests —
