@@ -54,6 +54,8 @@ def build_request(
         if logprobs and spec.supports_logprobs:
             body["logprobs"] = True
             body["top_logprobs"] = 20
+        if spec.extra_body:
+            body.update(spec.extra_body)
         return f"{spec.base_url}/chat/completions", headers, body
 
     if spec.provider == "anthropic":

@@ -95,6 +95,13 @@ review (data/spot_check_sample.jsonl, 112 variants) was completed by the
 author; no meaning-changing paraphrases were flagged among the admitted
 variants.
 
+**Judge lineup amendment (pre-run for the affected judge):** the small
+open-model slot changes from qwen-2.5-7b to llama-3.1-8b-instruct
+(OpenRouter, provider pinned to Novita): no OpenRouter provider serves the
+Qwen model with valid logprobs, which this judge exists to provide. Also
+claude-haiku pinned to its dated snapshot ID. No experiment had run on
+either judge at amendment time.
+
 ## Primary metrics
 
 - Decision flip rate at the 2.5 pass/fail threshold (LMUnit's), reported as

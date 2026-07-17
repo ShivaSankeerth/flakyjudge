@@ -42,11 +42,20 @@ judges:
     price_in_per_mtok: 0.10
     price_out_per_mtok: 0.40
     supports_logprobs: false
-  qwen-7b:
+  # Amendment (pre-run for this judge): originally qwen/qwen-2.5-7b-instruct,
+  # but no OpenRouter provider serves it with valid logprobs (Phala returns
+  # misaligned distributions; Together returns none). Llama-3.1-8B on Novita
+  # returns a correct digit distribution; provider pinned to prevent
+  # serving drift.
+  llama-8b:
     provider: openai-compat
-    model: qwen/qwen-2.5-7b-instruct
+    model: meta-llama/llama-3.1-8b-instruct
     base_url: https://openrouter.ai/api/v1
     api_key_env: OPENROUTER_API_KEY
-    price_in_per_mtok: 0.05
-    price_out_per_mtok: 0.10
+    price_in_per_mtok: 0.02
+    price_out_per_mtok: 0.03
     supports_logprobs: true
+    extra_body:
+      provider:
+        order: ["novita"]
+        allow_fallbacks: false

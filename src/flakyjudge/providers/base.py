@@ -24,6 +24,9 @@ class JudgeSpec:
     supports_logprobs: bool
     supports_temperature: bool = True
     extra_headers: dict | None = None
+    # Extra request-body fields (e.g. OpenRouter provider pinning). Not part
+    # of the cache key: it changes serving, not the request semantics.
+    extra_body: dict | None = None
 
 
 def load_judges(config_path: str | Path) -> dict[str, JudgeSpec]:
