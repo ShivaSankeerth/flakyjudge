@@ -3,18 +3,20 @@
 Claude Sonnet ignores the bare-digit instruction on ~10% of calls: it starts
 free-text analysis and truncates at max_tokens before emitting any digit.
 For every cached call whose text contains no digit score, this pass reissues
-the IDENTICAL request plus an assistant-message prefill ("Score: ") that
-forces the digit as the first generated token.
+the IDENTICAL request with max_tokens=256 so the judge can finish its
+analysis and emit a concluding score, parsed as the LAST "score: N" /
+standalone digit pattern in the text. (An assistant-prefill rescue was
+preregistered first but claude-sonnet-4-6's API rejects prefill.)
 
 Salvaged scores are written to results/rescue_scores.parquet keyed by
-(model, prompt_sha) with tier='prefill'. Analyses run with and without them.
-The rescue itself is a finding: a one-token prefill recovers format
-compliance without changing the judged content.
+(model, prompt_sha) with tier='extended'. Analyses run with and without
+them.
 """
 
 import asyncio
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -31,7 +33,20 @@ from flakyjudge.scoring import parse_direct_score
 
 CACHE_PATH = ROOT / "data" / "cache" / "responses.db"
 RESULTS = ROOT / "results"
-PREFILL = "Score: "
+RESCUE_MAX_TOKENS = 256
+SCORE_PATTERNS = [
+    re.compile(r"score\s*[:=]?\s*\**\s*([1-5])\b", re.IGNORECASE),
+    re.compile(r"\b([1-5])\s*(?:/\s*5)?\s*\.?\s*$"),
+]
+
+
+def parse_concluding_score(text: str) -> float | None:
+    """Last explicit score mention wins; fall back to a trailing digit."""
+    for pattern in SCORE_PATTERNS:
+        matches = pattern.findall(text.strip())
+        if matches:
+            return float(matches[-1])
+    return None
 
 
 def failed_anthropic_calls(cache: ResponseCache, model: str) -> list[dict]:
@@ -55,18 +70,15 @@ def failed_anthropic_calls(cache: ResponseCache, model: str) -> list[dict]:
 async def rescue_one(
     client: httpx.AsyncClient, cache: ResponseCache, spec, request: dict
 ) -> dict | None:
-    key = RequestKey(**{**request, "system": request["system"] + " [prefill-rescue]"})
+    key = RequestKey(**{**request, "max_tokens": RESCUE_MAX_TOKENS})
     raw = cache.get(key)
     if raw is None:
         cache.check_budget()
         body = {
             "model": spec.model,
             "system": request["system"],
-            "messages": [
-                {"role": "user", "content": request["prompt"]},
-                {"role": "assistant", "content": PREFILL.rstrip()},
-            ],
-            "max_tokens": request["max_tokens"],
+            "messages": [{"role": "user", "content": request["prompt"]}],
+            "max_tokens": RESCUE_MAX_TOKENS,
         }
         if request["temperature"] is not None:
             body["temperature"] = request["temperature"]
@@ -84,15 +96,15 @@ async def rescue_one(
         cache.put(key, raw, norm.input_tokens, norm.output_tokens,
                   compute_cost(spec, norm.input_tokens, norm.output_tokens))
     norm = normalize("anthropic", raw)
-    score = parse_direct_score(norm.text)
+    score = parse_direct_score(norm.text[:8]) or parse_concluding_score(norm.text)
     return {
         "model": request["model"],
         "prompt_sha": hashlib.sha256(request["prompt"].encode()).hexdigest(),
         "temperature": request["temperature"],
         "repeat_idx": request["repeat_idx"],
-        "tier": "prefill",
+        "tier": "extended",
         "score_direct": score,
-        "raw_text": norm.text[:100],
+        "raw_text": norm.text[-120:],
     }
 
 

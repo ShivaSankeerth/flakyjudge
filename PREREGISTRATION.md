@@ -107,9 +107,12 @@ analysis):** claude-sonnet-4-6 emits free-text analysis instead of the
 instructed bare digit on ~10% of calls (truncating at max_tokens with no
 score; claude-haiku <=1.5%; OpenAI judges 0%). Parse-failure rates are
 reported as a first-class robustness metric as originally preregistered.
-Additionally, failed calls are reissued once with an assistant prefill
-("Score: ") forcing the digit as the first generated token — identical
-prompt and parameters, distinct cache tier ('prefill'). All Claude analyses
+Additionally, failed calls are reissued once with max_tokens=256 and the
+concluding "score: N" parsed from the completed analysis — identical prompt,
+distinct cache tier ('extended'). (A prefill rescue was specified first, but
+the Anthropic API rejects assistant prefill for this model generation.)
+Salvage recovered 186/304 sonnet and 11/54 haiku failures; the remainder
+were still mid-analysis at 256 tokens and stay missing. All Claude analyses
 are reported with and without salvaged scores.
 
 ## Primary metrics
