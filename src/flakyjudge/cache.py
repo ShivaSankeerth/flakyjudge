@@ -57,7 +57,9 @@ class ResponseCache:
     def __init__(self, path: str | Path):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(self.path)
+        self.conn = sqlite3.connect(self.path, timeout=30.0)
+        # WAL allows concurrent experiment processes to share the cache.
+        self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.executescript(SCHEMA)
 
     def get(self, key: RequestKey) -> dict | None:
