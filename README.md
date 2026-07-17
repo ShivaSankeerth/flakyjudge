@@ -1,6 +1,6 @@
 # flakyjudge
 
-[![PyPI](https://img.shields.io/pypi/v/flakyjudge)](https://pypi.org/project/flakyjudge/) [![CI](https://github.com/ShivaSankeerth/flakyjudge/actions/workflows/ci.yml/badge.svg)](https://github.com/ShivaSankeerth/flakyjudge/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/flakyjudge)](https://pypi.org/project/flakyjudge/) [![CI](https://github.com/ShivaSankeerth/flakyjudge/actions/workflows/ci.yml/badge.svg)](https://github.com/ShivaSankeerth/flakyjudge/actions) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/ShivaSankeerth/flakyjudge/blob/main/LICENSE)
 
 **How stable are natural-language unit tests for LLM evals?**
 
@@ -10,12 +10,12 @@ by a judge model (LMUnit, TICK, checklist evals). This project measures the
 reliability of that paradigm: if you reword the assertion without changing
 its meaning, does the verdict change?
 
-![Rewording a unit test flips 16 of 78 verdicts (gpt-4o)](figures/fig1_hero_flips.png)
+![Rewording a unit test flips 16 of 78 verdicts (gpt-4o)](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig1_hero_flips.png)
 
-**📄 Tech report: [report/report.md](report/report.md)** — methods, all
+**📄 Tech report: [report/report.md](https://github.com/ShivaSankeerth/flakyjudge/blob/main/report/report.md)** — methods, all
 results, practical guidance, limitations.
 
-> Experimental design frozen in [PREREGISTRATION.md](PREREGISTRATION.md).
+> Experimental design frozen in [PREREGISTRATION.md](https://github.com/ShivaSankeerth/flakyjudge/blob/main/PREREGISTRATION.md).
 > Five judges across three families: gpt-4o, gpt-4o-mini, claude-sonnet-4-6,
 > claude-haiku-4-5, llama-3.1-8b. ~24,000 scored triples, $19 total spend.
 
@@ -28,14 +28,14 @@ results, practical guidance, limitations.
   concentrate ~3–7× on items whose scores sit near the pass/fail cut
   (29–40%) vs clear verdicts (5–13%).
 
-  ![Flip rates vs noise floor and controls](figures/fig2_flip_rates.png)
+  ![Flip rates vs noise floor and controls](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig2_flip_rates.png)
 - **"Stability" without validity is insensitivity — the controls catch it:**
   llama-8b looks most stable under paraphrase (5% flips) but barely reacts
   to deliberately meaning-*changed* criteria either (1–3% vs Claude's
   47–54%) — it isn't robust, it isn't reading the criterion. Every real
   judge shifts 3–4× more on controls than on true paraphrases.
 
-  ![Which rewordings move the score](figures/fig3_mechanism.png)
+  ![Which rewordings move the score](https://raw.githubusercontent.com/ShivaSankeerth/flakyjudge/main/figures/fig3_mechanism.png)
 - **The classic verbosity bias disappears under criterion-anchored judging,
   in every family:** content-matched 1.8× padding produces no significant
   positive drift for any judge; gpt-4o *rewards concision* (+0.23,
